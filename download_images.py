@@ -40,10 +40,6 @@ if __name__ == '__main__':
         print 'Creating folder to download images...[{}]'.format(image_folder)
         os.makedirs(image_folder)
 
-    # train_json_data = open('../cropping_training_set.json', 'r').read()
-    # data = json.loads(train_json_data)
-    # test_json_data = open('../cropping_testing_set.json', 'r').read()
-    # data.extend(json.loads(test_json_data))
     db = pkl.load(open("dataset.pkl", "rb"))
     URLs = [db[i]['url'] for i in xrange(0, len(db), 14)]
 
