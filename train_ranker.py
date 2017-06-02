@@ -153,7 +153,7 @@ def get_variable_dict(net_data):
         "c5b": tf.Variable(net_data["conv5"][1])}
     return variables_dict
 
-def build_alexconvnet(images, variable_dict, embedding_dim, SPP = False):
+def build_alexconvnet(images, variable_dict, embedding_dim, SPP = False, pooling = 'max'):
     #conv1
     #conv(11, 11, 96, 4, 4, padding='VALID', name='conv1')
     k_h = 11; k_w = 11; c_o = 96; s_h = 4; s_w = 4
@@ -230,14 +230,18 @@ def build_alexconvnet(images, variable_dict, embedding_dim, SPP = False):
     #max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
     with tf.variable_scope("conv5"):
         k_h = 3; k_w = 3; s_h = 2; s_w = 2; padding = 'VALID'
+        if pooling == 'max':
+            pooling_func = tf.nn.max_pool
+        else:
+            pooling_func = tf.nn.avg_pool
         if SPP:
-            maxpool3 = tf.nn.max_pool(conv5, ksize=[1, 5, 5, 1], strides=[1, 4, 4, 1], padding=padding)
-            maxpool2 = tf.nn.max_pool(conv5, ksize=[1, 7, 7, 1], strides=[1, 6, 6, 1], padding=padding)
-            maxpool1 = tf.nn.max_pool(conv5, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding=padding)
+            maxpool3 = pooling_func(conv5, ksize=[1, 5, 5, 1], strides=[1, 4, 4, 1], padding=padding)
+            maxpool2 = pooling_func(conv5, ksize=[1, 7, 7, 1], strides=[1, 6, 6, 1], padding=padding)
+            maxpool1 = pooling_func(conv5, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding=padding)
             concat5 = tf.concat([tf.contrib.layers.flatten(maxpool1), tf.contrib.layers.flatten(maxpool2), tf.contrib.layers.flatten(maxpool3)], 1)
             bn5 = concat5
         else:
-            maxpool5 = tf.nn.max_pool(conv5, ksize=[1, k_h, k_w, 1], strides=[1, s_h, s_w, 1], padding=padding)
+            maxpool5 = pooling_func(conv5, ksize=[1, k_h, k_w, 1], strides=[1, s_h, s_w, 1], padding=padding)
             bn5 = tf.contrib.layers.flatten(maxpool5, maxpool5.get_shape()[-1])
 
     flattened_dim = int(np.prod(bn5.get_shape()[1:]))
@@ -266,6 +270,7 @@ if __name__ == '__main__':
     parser.add_argument("--ranking_loss", help="Type of ranking loss", type=str, choices=['ranknet', 'svm'], default='svm')
     parser.add_argument("--checkpoint_name", help="Name of the checkpoint files", type=str, default='view_finder_network')
     parser.add_argument("--spp", help="Whether to use spatial pyramid pooling in the last layer or not", type=bool, default=True)
+    parser.add_argument("--pooling", help="Which pooling function to use", type=bool, choices=['max', 'avg'], default='max')
     parser.add_argument("--augment", help="Whether to augment training data or not", type=bool, default=True)
     parser.add_argument("--training_db", help="Path to training database", type=str, default='trn.tfrecords')
     parser.add_argument("--validation_db", help="Path to validation database", type=str, default='val.tfrecords')
@@ -292,7 +297,7 @@ if __name__ == '__main__':
     augment_training_data = args.augment
 
     parameter_table = [["Initial parameters", parameter_path],
-                ["Ranking loss", ranking_loss], ["SPP", spp],
+                    ["Ranking loss", ranking_loss], ["SPP", spp], ["Pooling", args.pooling],
                     ['Experiment', experiment_name],
                     ['Embedding dim', embedding_dim], ['Batch size', batch_size_trn],
                     ['Initial LR', initial_lr], ['Momentum', momentum_coeff],
@@ -304,10 +309,10 @@ if __name__ == '__main__':
     net_data = np.load(parameter_path).item()
     var_dict=  get_variable_dict(net_data)
     with tf.variable_scope("ranker") as scope:
-        feature_vec = build_alexconvnet(training_images, var_dict, embedding_dim, spp)
+        feature_vec = build_alexconvnet(training_images, var_dict, embedding_dim, spp, args.pooling)
         L, p = loss(feature_vec, build_loss_matrix(batch_size_trn), ranking_loss)
         scope.reuse_variables()
-        val_feature_vec = build_alexconvnet(test_images, var_dict, embedding_dim, spp)
+        val_feature_vec = build_alexconvnet(test_images, var_dict, embedding_dim, spp, args.pooling)
         L_val, p_val = loss(val_feature_vec, build_loss_matrix(batch_size_val), ranking_loss)
 
     lr = tf.Variable(initial_lr)
