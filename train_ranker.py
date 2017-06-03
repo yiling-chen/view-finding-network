@@ -252,14 +252,20 @@ def build_alexconvnet(images, variable_dict, embedding_dim, SPP = False, pooling
 
     return fc6
 
+def count_tfrecords(path):
+    cnt = 0
+    for record in tf.python_io.tf_record_iterator(path):
+        cnt+=1
+    return cnt
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--embedding_dim", help="Embedding dimension before mapping to one-dimensional score", type=int, default = 1000)
     parser.add_argument("--validation_interval", help="Number of iterations after which validation is run", type=int, default = 500)
-    parser.add_argument("--validation_instances", help="Number of validation instances", type=int, default=4040*14)
+    #parser.add_argument("--validation_instances", help="Number of validation instances", type=int, default=4040*14)
     parser.add_argument("--batch_train", help="Batch size for training", type=int, default=100)
-    parser.add_argument("--batch_val", help="Batch size for validation", type=int, default = 100)
+    parser.add_argument("--batch_val", help="Batch size for validation", type=int, default=14)
     parser.add_argument("--checkpoint_interval", help="Number of iterations after which a checkpoint file is written", type=int, default=1000)
     parser.add_argument("--total_steps", help="Number of total training iterations", type=int, default=15000)
     parser.add_argument("--initial_lr", help="Initial learning rate", type=float, default=0.01)
@@ -277,7 +283,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     embedding_dim = args.embedding_dim
     validation_interval = args.validation_interval
-    validation_instances = args.validation_instances
+    validation_instances = count_tfrecords(args.validation_db)
     batch_size_trn = args.batch_train
     batch_size_val = args.batch_val
     checkpoint_interval = args.checkpoint_interval
