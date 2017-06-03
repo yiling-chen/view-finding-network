@@ -4,7 +4,6 @@ Created on Tue Sep 27 18:28:02 2016
 
 @author: jan
 """
-
 import numpy as np
 import skimage.transform as transform
 import skimage.io as io
@@ -14,14 +13,7 @@ import os
 import re
 import argparse
 
-path_to_images = '/mnt/2TB/Projects/VFN/view-finding-network/raw_images'
-path_to_tfrec = '/mnt/2TB/Projects/VFN/view-finding-network/'
-path_to_mturkdb = 'mturk_db_v6-6.pkl'
-
 cnn_input = (227,227)
-
-n_trn = 14000
-n_val = 3400
 
 def _int64_feature(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
@@ -44,6 +36,11 @@ def create_database(tfr_file, image_folder, mtdb, offset, n, size, crops, n_crop
             info = mtdb[idx]
             match = expr.match(info['url'])
             img_path = os.path.join(image_folder, match.group(1))
+            # skip images of small size, which is very likely to be an image already deleted by user
+            img_info = os.stat(img_path)
+            if img_info.st_size < 9999:
+                k += 1
+                continue
             img = io.imread(img_path).astype(np.float32)/255.
             if img.ndim == 2:
                 img = np.expand_dims(img, axis=-1)
@@ -80,9 +77,9 @@ if __name__ == "__main__":
     parser.add_argument("--training_db", help="Path to training database", type=str, default="trn.tfrecords")
     parser.add_argument("--validation_db", help="Path to validation database", type=str, default="val.tfrecords")
     parser.add_argument("--image_folder", help="Folder containing training & validation images as downloaded from Flickr", type=str, default="images/")
-    parser.add_argument("--n_trn", help="Number of training images", type=int, default=14000)
-    parser.add_argument("--n_val", help="Number of validation images", type=int, default=3400)
-    parser.add_argument("--crop_data", help="Path to crop database", type=str, default="crop_db.pkl")
+    parser.add_argument("--n_trn", help="Number of training images", type=int, default=17000)
+    parser.add_argument("--n_val", help="Number of validation images", type=int, default=4040)
+    parser.add_argument("--crop_data", help="Path to crop database", type=str, default="dataset.pkl")
     parser.add_argument("--n_crops", help="Number of crops per image", type=int, default=14)
     args = parser.parse_args()
 
@@ -96,5 +93,5 @@ if __name__ == "__main__":
         exit()
     offset_val = create_database(args.training_db, args.image_folder, crop_db, 0,
             args.n_trn, cnn_input, xrange(args.n_crops), args.n_crops)
-    create_database(args.validation_db, args.image_folder, crop_db, offset_val,
+    val_images = create_database(args.validation_db, args.image_folder, crop_db, offset_val,
             args.n_val, cnn_input, xrange(args.n_crops), args.n_crops)

@@ -6,7 +6,7 @@ import multiprocessing
 import cPickle as pkl
 from PIL import Image
 
-image_folder = './data/'
+image_folder = './images/'
 
 def fetch_image(url):
     filename = os.path.split(url)[-1]
@@ -26,8 +26,8 @@ if __name__ == '__main__':
         '-w', '--workers', type=int, default=-1,
         help="num workers used to download images. -x uses (all - x) cores [-1 default]."
     )
-    parser.add_argument('-dir', type=str, default='./data/',
-        help='the path to save the images, default="./data/"'
+    parser.add_argument('-dir', type=str, default='./images/',
+        help='the path to save the images, default="./images/"'
     )
     args = parser.parse_args()
     image_folder = args.dir
@@ -43,6 +43,6 @@ if __name__ == '__main__':
     db = pkl.load(open("dataset.pkl", "rb"))
     URLs = [db[i]['url'] for i in xrange(0, len(db), 14)]
 
-    print('Downloading {} images with {} workers...'.format(len(URLs[:10]), num_workers))
+    print('Downloading {} images with {} workers...'.format(len(URLs), num_workers))
     pool = multiprocessing.Pool(processes=num_workers)
-    pool.map(fetch_image, URLs[:10])
+    pool.map(fetch_image, URLs)
