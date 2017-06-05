@@ -12,63 +12,42 @@ global_dtype_np = np.float32
 # Helper Functions
 
 def build_loss_matrix(batch_size):
-    loss_matrix = np.zeros(shape=(batch_size, batch_size * 2), dtype=global_dtype_np)
+    loss_matrix = np.zeros(shape=(batch_size, batch_size * 2), dtype=np.float32)
     for k in range(batch_size):
         loss_matrix[k,k] = 1
         loss_matrix[k,k+batch_size] = -1
     return loss_matrix
 
-
-def init_weight(shape):
-    init = tf.truncated_normal(shape, stddev=0.1, dtype=global_dtype)
-    return tf.Variable(init)
-
-
-def init_bias(shape):
-    init = tf.constant(0.01, shape=shape, dtype=global_dtype)
-    return tf.Variable(init)
-
-
-def conv2d(x, filter_shape, stride):
-    W = init_weight(filter_shape)
-    b = init_bias([filter_shape[-1]])
-    return tf.nn.conv2d(x, W, strides=[1,stride,stride,1], padding='SAME') + b
-
-
-def pool2d(x, height, width):
-    return tf.nn.max_pool(x, ksize=[1,height,width,1], strides=[1,height,width,1], padding='SAME')
-
-
-def cbr(x,W,b, stride=1):
-    return tf.nn.relu(conv2d(x,W, stride)+b)
-
-
-def batch_norm(x, shape):
-    return tf.nn.batch_normalization(x,
-                                     tf.get_variable("mean", shape=[shape], initializer=tf.constant_initializer()),
-                                     tf.get_variable("var", shape=[shape], initializer=tf.constant_initializer(1.0)),
-                                     None, None, 0.0001)
-
-
-def loss(feature_vec):
-    W = tf.get_variable("W", shape=[feature_vec.get_shape()[1],1], initializer=tf.uniform_unit_scaling_initializer()) # init_weight([int(feature_vec.get_shape()[1]),    1])
+def svm_loss(feature_vec, loss_matrix):
+    W = tf.get_variable("W", shape=[feature_vec.get_shape()[1],1], initializer=tf.uniform_unit_scaling_initializer()) # init_weight([int(feature_vec.get_shape()[1]),1])
     q = tf.matmul(feature_vec,W)
-    return q
+    p = tf.matmul(loss_matrix,q)
+    zero = tf.constant(0.0, shape=[1], dtype=tf.float32)
+    p_hinge = tf.maximum(zero, 1+p)
+    L = tf.reduce_mean(p_hinge)
+    return L, p
 
+def ranknet_loss(feature_vec, loss_matrix):
+    W = tf.get_variable("W", shape=[feature_vec.get_shape()[1],1],
+                                    initializer=tf.uniform_unit_scaling_initializer()) # init_weight([int(feature_vec.get_shape()[1]),1])
+    q = tf.matmul(feature_vec,W)
+    p = tf.matmul(loss_matrix,q)
+    L = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(p, tf.zeros_like(p), name='RankNetLoss'))
+    return L, p
 
-def evaluate_loss(L, p, session, img_placeholder, test_images, n_batches):
-    loss_value = 0.0
-    correct_corners = np.zeros(shape=(4,))
-    for k in range(n_batches):
-        lv, pv = sess.run([L, p], feed_dict={img_placeholder: sess.run(test_images)})
-        loss_value += lv
-        for k in range(4):
-            correct_corners[k] = correct_corners[k] + np.count_nonzero(pv[k::4] < 0)
-    return loss_value/n_batches, correct_corners
-
+def loss(feature_vec, loss_matrix, ranking_loss_type):
+    if ranking_loss_type == 'svm':
+        return svm_loss(feature_vec, loss_matrix)
+    elif ranking_loss_type == 'ranknet':
+        return ranknet_loss(feature_vec, loss_matrix)
+    else:
+        print "Error: ranking loss >> {} << is unknown".format(ranking_loss_type)
 # Setup Neural Network
 
+
 def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w,  padding="VALID", group=1):
+    '''From https://github.com/ethereon/caffe-tensorflow
+    '''
     c_i = input.get_shape()[-1]
     assert c_i%group==0
     assert c_o%group==0
@@ -78,12 +57,11 @@ def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w,  padding="VALID", group
     if group==1:
         conv = convolve(input, kernel)
     else:
-        input_groups = tf.split(3, group, input)
-        kernel_groups = tf.split(3, group, kernel)
+        input_groups = tf.split(input, group, 3)
+        kernel_groups = tf.split(kernel, group, 3)
         output_groups = [convolve(i, k) for i,k in zip(input_groups, kernel_groups)]
-        conv = tf.concat(3, output_groups)
+        conv = tf.concat(output_groups, 3)
     return  tf.reshape(tf.nn.bias_add(conv, biases), [-1]+conv.get_shape().as_list()[1:])
-
 
 def get_variable_dict(net_data):
     variables_dict = {
@@ -103,11 +81,11 @@ def get_variable_dict(net_data):
         "c5b": tf.Variable(net_data["conv5"][1])}
     return variables_dict
 
-
-def build_alexconvnet(images, variable_dict, embedding_dim):
+def build_alexconvnet(images, variable_dict, embedding_dim, SPP = False, pooling = 'max'):
     #conv1
     #conv(11, 11, 96, 4, 4, padding='VALID', name='conv1')
     k_h = 11; k_w = 11; c_o = 96; s_h = 4; s_w = 4
+
     conv1W = variable_dict["c1w"]
     conv1b = variable_dict["c1b"]
     conv1_in = conv(images, conv1W, conv1b, k_h, k_w, c_o, s_h, s_w, padding="SAME", group=1)
@@ -117,10 +95,10 @@ def build_alexconvnet(images, variable_dict, embedding_dim):
     #lrn(2, 2e-05, 0.75, name='norm1')
     radius = 2; alpha = 2e-05; beta = 0.75; bias = 1.0
     lrn1 = tf.nn.local_response_normalization(conv1,
-                                              depth_radius=radius,
-                                              alpha=alpha,
-                                              beta=beta,
-                                              bias=bias)
+                                                      depth_radius=radius,
+                                                      alpha=alpha,
+                                                      beta=beta,
+                                                      bias=bias)
 
     #maxpool1
     #max_pool(3, 3, 2, 2, padding='VALID', name='pool1')
@@ -141,10 +119,10 @@ def build_alexconvnet(images, variable_dict, embedding_dim):
     #lrn(2, 2e-05, 0.75, name='norm2')
     radius = 2; alpha = 2e-05; beta = 0.75; bias = 1.0
     lrn2 = tf.nn.local_response_normalization(conv2,
-                                              depth_radius=radius,
-                                              alpha=alpha,
-                                              beta=beta,
-                                              bias=bias)
+                                                      depth_radius=radius,
+                                                      alpha=alpha,
+                                                      beta=beta,
+                                                      bias=bias)
 
     #maxpool2
     #max_pool(3, 3, 2, 2, padding='VALID', name='pool2')
@@ -178,29 +156,28 @@ def build_alexconvnet(images, variable_dict, embedding_dim):
 
     #maxpool5
     #max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
-
-    # Below is the SPP implementation. To deactivate SPP, uncomment the commented lines and put the two SPP sections into comments.
     with tf.variable_scope("conv5"):
         k_h = 3; k_w = 3; s_h = 2; s_w = 2; padding = 'VALID'
-        #maxpool5 = tf.nn.max_pool(conv5, ksize=[1, k_h, k_w, 1], strides=[1, s_h, s_w, 1], padding=padding)
-        #bn5 = batch_norm(maxpool5, 256)
-
-        # SPP 1 Start
-        maxpool3 = tf.nn.max_pool(conv5, ksize=[1, 5, 5, 1], strides=[1, 4, 4, 1], padding=padding)
-        maxpool2 = tf.nn.max_pool(conv5, ksize=[1, 7, 7, 1], strides=[1, 6, 6, 1], padding=padding)
-        maxpool1 = tf.nn.max_pool(conv5, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding=padding)
-        concat5 = tf.concat(1, [tf.contrib.layers.flatten(maxpool1), tf.contrib.layers.flatten(maxpool2), tf.contrib.layers.flatten(maxpool3)])
-        bn5 = batch_norm(concat5, concat5.get_shape()[-1])
-        # SPP 1 End
+        if pooling == 'max':
+            pooling_func = tf.nn.max_pool
+        else:
+            pooling_func = tf.nn.avg_pool
+        if SPP:
+            maxpool3 = pooling_func(conv5, ksize=[1, 5, 5, 1], strides=[1, 4, 4, 1], padding=padding)
+            maxpool2 = pooling_func(conv5, ksize=[1, 7, 7, 1], strides=[1, 6, 6, 1], padding=padding)
+            maxpool1 = pooling_func(conv5, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding=padding)
+            concat5 = tf.concat([tf.contrib.layers.flatten(maxpool1), tf.contrib.layers.flatten(maxpool2), tf.contrib.layers.flatten(maxpool3)], 1)
+            bn5 = concat5
+        else:
+            maxpool5 = pooling_func(conv5, ksize=[1, k_h, k_w, 1], strides=[1, s_h, s_w, 1], padding=padding)
+            bn5 = tf.contrib.layers.flatten(maxpool5, maxpool5.get_shape()[-1])
 
     flattened_dim = int(np.prod(bn5.get_shape()[1:]))
-    fc6W =  tf.get_variable("fc6w", [flattened_dim, embedding_dim], initializer = tf.uniform_unit_scaling_initializer()) # init_weight((flattened_dim, embedding_dim)    )
+    fc6W =  tf.get_variable("fc6w", [flattened_dim, embedding_dim], initializer = tf.uniform_unit_scaling_initializer()) # init_weight((flattened_dim, embedding_dim))
     fc6b = tf.get_variable("fc6b", [embedding_dim], initializer = tf.constant_initializer())  #init_bias([embedding_dim])
-    #fc6 = tf.nn.relu_layer(bn5, fc6W, fc6b)
 
-    # SPP 2 Start
-    fc6 = tf.nn.relu_layer(tf.reshape(bn5, [-1, flattened_dim]), fc6W, fc6b)
-    # SPP 2 End
+    fc6 = tf.nn.relu_layer(bn5, fc6W, fc6b)
+
     return fc6
 
 
@@ -282,8 +259,8 @@ def evaluate_aesthetics_score(images):
 
 
 embedding_dim = 1000
-snapshot = './snapshots/model.ckpt-15000'
-net_data = np.load("./data/alexconvnet.npy").item()
+snapshot = './snapshots/ranker_svm_1000.ckpt-15000.meta'
+net_data = np.load("./alexnet.npy").item()
 image_placeholder = tf.placeholder(dtype=global_dtype, shape=[1,227,227,3])
 var_dict = get_variable_dict(net_data)
 with tf.variable_scope("ranker") as scope:

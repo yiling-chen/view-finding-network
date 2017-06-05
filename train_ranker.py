@@ -12,7 +12,7 @@ import imp
 tabulate_available = False
 try:
     imp.find_module('tabulate')
-    tabulate_avaiable = True
+    tabulate_available = True
 except ImportError:
     pass
 if tabulate_available:
@@ -368,5 +368,6 @@ if __name__ == '__main__':
             else:
                 print "\tValidation: L={:0.4f}".format(val_avg)
             np.savez("{}_history.npz".format(experiment_name), validation=validation_history)
-    print tabulate(parameter_table)
+    if tabulate_available:
+        print tabulate(parameter_table)
     sess.close()
