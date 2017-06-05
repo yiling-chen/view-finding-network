@@ -258,6 +258,13 @@ def count_tfrecords(path):
         cnt+=1
     return cnt
 
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -275,9 +282,9 @@ if __name__ == '__main__':
     parser.add_argument("--initial_parameters", help="Path to initial parameter file", type=str, default="alexnet.npy")
     parser.add_argument("--ranking_loss", help="Type of ranking loss", type=str, choices=['ranknet', 'svm'], default='svm')
     parser.add_argument("--checkpoint_name", help="Name of the checkpoint files", type=str, default='view_finding_network')
-    parser.add_argument("--spp", help="Whether to use spatial pyramid pooling in the last layer or not", type=bool, default=True)
-    parser.add_argument("--pooling", help="Which pooling function to use", type=bool, choices=['max', 'avg'], default='max')
-    parser.add_argument("--augment", help="Whether to augment training data or not", type=bool, default=True)
+    parser.add_argument("--spp", help="Whether to use spatial pyramid pooling in the last layer or not", type=str2bool, default=True)
+    parser.add_argument("--pooling", help="Which pooling function to use", type=str, choices=['max', 'avg'], default='max')
+    parser.add_argument("--augment", help="Whether to augment training data or not", type=str2bool, default=True)
     parser.add_argument("--training_db", help="Path to training database", type=str, default='trn.tfrecords')
     parser.add_argument("--validation_db", help="Path to validation database", type=str, default='val.tfrecords')
     args = parser.parse_args()
