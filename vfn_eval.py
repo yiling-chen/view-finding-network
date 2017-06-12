@@ -170,7 +170,7 @@ def build_alexconvnet(images, variable_dict, embedding_dim, SPP = False, pooling
             bn5 = concat5
         else:
             maxpool5 = pooling_func(conv5, ksize=[1, k_h, k_w, 1], strides=[1, s_h, s_w, 1], padding=padding)
-            bn5 = tf.contrib.layers.flatten(maxpool5, maxpool5.get_shape()[-1])
+            bn5 = tf.contrib.layers.flatten(maxpool5)
 
     flattened_dim = int(np.prod(bn5.get_shape()[1:]))
     fc6W =  tf.get_variable("fc6w", [flattened_dim, embedding_dim], initializer = tf.uniform_unit_scaling_initializer()) # init_weight((flattened_dim, embedding_dim))
