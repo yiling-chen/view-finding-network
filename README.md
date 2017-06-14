@@ -19,8 +19,8 @@ You will need to have `tensorflow`, `skimage`, `tabulate`, `pillow` installed on
 
 ## Download the dataset
 
-1. Clone the repository to your local disk.
-2. Under a command line window, run the following command to get the images with cropping annotations:
+* Clone the repository to your local disk.
+* Under a command line window, run the following command to get the images with cropping annotations:
 ```bash
 $ python download_images.py -w 4
 ```
@@ -33,9 +33,13 @@ The above command will launch 4 worker threads to download the images to a defau
 ```bash
 $ python train_ranker.py --spp 0
 ```
-The above example starts training with SPP disabled. Note that if you changed the output filenames when running `create_dbs.py`, you will need to provide the new filenames to `train_ranker.py`. Take a look at the script to check out other available parameters.
+The above example starts training with SPP disabled. Note that if you changed the output filenames when running `create_dbs.py`, you will need to provide the new filenames to `train_ranker.py`. Take a look at the script to check out other available parameters or run the following command.
+```bash
+$ python train_ranker.py -h
+```
 
 ## Evaluation
+
 We provide the evaluation script to reproduce our evaluation results on [Flickr cropping dataset](https://github.com/yiling-chen/flickr-cropping-dataset).
 ```bash
 $ python vfn_eval.py

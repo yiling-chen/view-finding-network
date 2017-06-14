@@ -43,7 +43,7 @@ def evaluate_sliding_window(img_filename, crops):
 
 
 def evaluate_FCDB():
-    slidling_windows_string = open('./data/sliding_window.json', 'r').read()
+    slidling_windows_string = open('./sliding_window.json', 'r').read()
     sliding_windows = json.loads(slidling_windows_string)
 
     cnt = 0
@@ -92,7 +92,7 @@ def evaluate_aesthetics_score(images):
 
 embedding_dim = 1000
 ranking_loss = 'svm' # 'ranknet'
-snapshot = './snapshots/ranker_svm_1000.ckpt-15000.meta'
+snapshot = './snapshots/model.ckpt-15000.meta'
 net_data = np.load("./alexnet.npy").item()
 image_placeholder = tf.placeholder(dtype=global_dtype, shape=[1,227,227,3])
 var_dict = nw.get_variable_dict(net_data)

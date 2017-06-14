@@ -102,7 +102,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--embedding_dim", help="Embedding dimension before mapping to one-dimensional score", type=int, default = 1000)
     parser.add_argument("--validation_interval", help="Number of iterations after which validation is run", type=int, default = 500)
-    #parser.add_argument("--validation_instances", help="Number of validation instances", type=int, default=4040*14)
     parser.add_argument("--batch_train", help="Batch size for training", type=int, default=100)
     parser.add_argument("--batch_val", help="Batch size for validation", type=int, default=14)
     parser.add_argument("--checkpoint_interval", help="Number of iterations after which a checkpoint file is written", type=int, default=1000)
@@ -119,24 +118,21 @@ if __name__ == '__main__':
     parser.add_argument("--augment", help="Whether to augment training data or not", type=str2bool, default=True)
     parser.add_argument("--training_db", help="Path to training database", type=str, default='trn.tfrecords')
     parser.add_argument("--validation_db", help="Path to validation database", type=str, default='val.tfrecords')
+
     args = parser.parse_args()
     embedding_dim = args.embedding_dim
     validation_interval = args.validation_interval
-    validation_instances = count_tfrecords(args.validation_db)
     batch_size_trn = args.batch_train
     batch_size_val = args.batch_val
     checkpoint_interval = args.checkpoint_interval
     total_steps = args.total_steps
-
+    validation_instances = count_tfrecords(args.validation_db)
     initial_lr = args.initial_lr
     momentum_coeff = args.momentum
     step_size = args.step_size
     step_factor = args.step_factor
-
     parameter_path = args.initial_parameters
-
     ranking_loss = args.ranking_loss
-
     experiment_name = args.ranking_loss
     spp = args.spp
     augment_training_data = args.augment
