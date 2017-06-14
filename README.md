@@ -29,13 +29,13 @@ The above command will launch 4 worker threads to download the images to a defau
 ## Training
 
 * Run `create_dbs.py` to generate the TFRecords files used by Tensorflow.
-* Run `train_ranker.py` to start training.
+* Run `vfn_train.py` to start training.
 ```bash
-$ python train_ranker.py --spp 0
+$ python vfn_train.py --spp 0
 ```
-The above example starts training with SPP disabled. Note that if you changed the output filenames when running `create_dbs.py`, you will need to provide the new filenames to `train_ranker.py`. Take a look at the script to check out other available parameters or run the following command.
+The above example starts training with SPP disabled. Note that if you changed the output filenames when running `create_dbs.py`, you will need to provide the new filenames to `vfn_train.py`. Take a look at the script to check out other available parameters or run the following command.
 ```bash
-$ python train_ranker.py -h
+$ python vfn_train.py -h
 ```
 
 ## Evaluation
