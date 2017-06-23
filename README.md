@@ -4,18 +4,9 @@ This repository contains the dataset and scripts used in the following article:
 
 [Yi-Ling Chen](https://yiling-chen.github.io/), Jan Klopp, [Min Sun](http://aliensunmin.github.io/), [Shao-Yi Chien](http://www.ee.ntu.edu.tw/profile?id=101), [Kwan-Liu Ma](www.cs.ucdavis.edu/~ma/), ["Learning to Compose with Professional Photographs on the Web"](https://arxiv.org/abs/1702.00503), ACM Multimedia 2017.
 
-**If this work helps your research, please cite the following article:**
-
-    @inproceedings{chen-acmmm-2017,
-      title={Learning to Compose with Professional Photographs on the Web},
-      author={Yi-Ling Chen and Jan Klopp and Min Sun and Shao-Yi Chien and Kwan-Liu Ma},
-      booktitle={ACM Multimedia 2017},
-      year={2017}
-    }
-
 ## Dependencies
 
-You will need to have `tensorflow`, `skimage`, `tabulate`, `pillow` installed on your system to run the scripts.
+You will need to have `tensorflow` (version > 1.0), `skimage`, `tabulate`, `pillow` installed on your system to run the scripts.
 
 ## Download the dataset
 
@@ -33,10 +24,15 @@ The above command will launch 4 worker threads to download the images to a defau
 ```bash
 $ python vfn_train.py --spp 0
 ```
-The above example starts training with SPP disabled. Note that if you changed the output filenames when running `create_dbs.py`, you will need to provide the new filenames to `vfn_train.py`. Take a look at the script to check out other available parameters or run the following command.
+The above example starts training with SPP disabled. Or you may want to enable SPP with either `max` or `avg` options.
+```bash
+$ python vfn_train.py --pooling max
+```
+Note that if you changed the output filenames when running `create_dbs.py`, you will need to provide the new filenames to `vfn_train.py`. Take a look at the script to check out other available parameters or run the following command.
 ```bash
 $ python vfn_train.py -h
 ```
+We also release our pre-trained models, which can be downloaded from [here]()
 
 ## Evaluation
 
@@ -48,3 +44,12 @@ You will need to get `sliding_window.json` and the test images from the website 
 
 ## Questions?
 If you have questions/suggestions, feel free to send an email to (yiling dot chen dot ntu at gmail dot com).
+
+**If this work helps your research, please cite the following article:**
+
+    @inproceedings{chen-acmmm-2017,
+      title={Learning to Compose with Professional Photographs on the Web},
+      author={Yi-Ling Chen and Jan Klopp and Min Sun and Shao-Yi Chien and Kwan-Liu Ma},
+      booktitle={ACM Multimedia 2017},
+      year={2017}
+    }
