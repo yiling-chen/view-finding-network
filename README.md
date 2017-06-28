@@ -11,11 +11,11 @@ You will need to have `tensorflow` (version > 1.0), `skimage`, `tabulate`, `pill
 ## Download the dataset
 
 * Clone the repository to your local disk.
-* Under a command line window, run the following command to get the images with cropping annotations:
+* Under a command line window, run the following command to get the training images from Flickr:
 ```bash
 $ python download_images.py -w 4
 ```
-The above command will launch 4 worker threads to download the images to a default folder (./images) from Flickr.
+The above command will launch 4 worker threads to download the images to a default folder (./images).
 
 ## Training
 
@@ -32,7 +32,7 @@ Note that if you changed the output filenames when running `create_dbs.py`, you 
 ```bash
 $ python vfn_train.py -h
 ```
-We also release our pre-trained models, which can be downloaded from [here]()
+We also release our pre-trained models, which can be downloaded from [here](https://drive.google.com/drive/folders/0B0sDVRDPL5zBd3ozNlFmZEZpY1k?usp=sharing)
 
 ## Evaluation
 
