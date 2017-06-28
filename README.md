@@ -32,7 +32,6 @@ Note that if you changed the output filenames when running `create_dbs.py`, you 
 ```bash
 $ python vfn_train.py -h
 ```
-We also release our pre-trained models, which can be downloaded from [here](https://drive.google.com/drive/folders/0B0sDVRDPL5zBd3ozNlFmZEZpY1k?usp=sharing)
 
 ## Evaluation
 
@@ -40,7 +39,7 @@ We provide the evaluation script to reproduce our evaluation results on [Flickr 
 ```bash
 $ python vfn_eval.py
 ```
-You will need to get `sliding_window.json` and the test images from the website of [Flickr cropping dataset](https://github.com/yiling-chen/flickr-cropping-dataset) and specify the path of your model in `vfn_eval.py`. You can also try our pre-trained model, which can be downloaded from [here]().
+You will need to get `sliding_window.json` and the test images from the website of [Flickr cropping dataset](https://github.com/yiling-chen/flickr-cropping-dataset) and specify the path of your model in `vfn_eval.py`. You can also try our pre-trained model, which can be downloaded from [here](https://drive.google.com/drive/folders/0B0sDVRDPL5zBd3ozNlFmZEZpY1k?usp=sharing).
 
 ## Questions?
 If you have questions/suggestions, feel free to send an email to (yiling dot chen dot ntu at gmail dot com).
