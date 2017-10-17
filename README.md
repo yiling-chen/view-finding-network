@@ -35,9 +35,9 @@ $ python vfn_train.py -h
 
 ## Evaluation
 
-We provide the evaluation script to reproduce our evaluation results on [Flickr cropping dataset](https://github.com/yiling-chen/flickr-cropping-dataset).
+We provide the evaluation script to reproduce our evaluation results on [Flickr cropping dataset](https://github.com/yiling-chen/flickr-cropping-dataset). For example,
 ```bash
-$ python vfn_eval.py
+$ python vfn_eval.py --spp false --snapshot snapshots/model-wo-spp
 ```
 You will need to get `sliding_window.json` and the test images from the [Flickr cropping dataset](https://github.com/yiling-chen/flickr-cropping-dataset) and specify the path of your model when running `vfn_eval.py`. You can also try our pre-trained model, which can be downloaded from [here](https://drive.google.com/drive/folders/0B0sDVRDPL5zBd3ozNlFmZEZpY1k?usp=sharing).
 
