@@ -2,7 +2,7 @@
 
 This repository contains the dataset and scripts used in the following article:
 
-[Yi-Ling Chen](https://yiling-chen.github.io/), Jan Klopp, [Min Sun](http://aliensunmin.github.io/), [Shao-Yi Chien](http://www.ee.ntu.edu.tw/profile?id=101), [Kwan-Liu Ma](http://www.cs.ucdavis.edu/~ma/), ["Learning to Compose with Professional Photographs on the Web"](https://arxiv.org/abs/1702.00503), to appear in ACM Multimedia 2017.
+[Yi-Ling Chen](https://yiling-chen.github.io/), Jan Klopp, [Min Sun](http://aliensunmin.github.io/), [Shao-Yi Chien](http://www.ee.ntu.edu.tw/profile?id=101), [Kwan-Liu Ma](http://www.cs.ucdavis.edu/~ma/), ["Learning to Compose with Professional Photographs on the Web"](https://arxiv.org/abs/1702.00503), in Proc. of ACM Multimedia 2017.
 
 ## Dependencies
 
@@ -39,7 +39,9 @@ We provide the evaluation script to reproduce our evaluation results on [Flickr 
 ```bash
 $ python vfn_eval.py --spp false --snapshot snapshots/model-wo-spp
 ```
-You will need to get `sliding_window.json` and the test images from the [Flickr cropping dataset](https://github.com/yiling-chen/flickr-cropping-dataset) and specify the path of your model when running `vfn_eval.py`. You can also try our pre-trained model, which can be downloaded from [here](https://drive.google.com/drive/folders/0B0sDVRDPL5zBd3ozNlFmZEZpY1k?usp=sharing).
+You will need to get `sliding_window.json` and the test images from the [Flickr cropping dataset](https://github.com/yiling-chen/flickr-cropping-dataset) and specify the path of your model when running `vfn_eval.py`. You can also try our pre-trained model, which can be downloaded from [here](https://drive.google.com/drive/folders/0B0sDVRDPL5zBd3ozNlFmZEZpY1k?usp=sharing). 
+
+If you want to get an aesthetic score of a patch, please take a look at the example featured by [ModelDepot](https://modeldepot.io/yilingchen/view-finding-network)
 
 ## Questions?
 If you have questions/suggestions, feel free to send an email to (yiling dot chen dot ntu at gmail dot com).
