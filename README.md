@@ -2,7 +2,7 @@
 
 This repository contains the dataset and scripts used in the following article:
 
-[Yi-Ling Chen](https://yiling-chen.github.io/), Jan Klopp, [Min Sun](http://aliensunmin.github.io/), [Shao-Yi Chien](http://www.ee.ntu.edu.tw/profile?id=101), [Kwan-Liu Ma](http://www.cs.ucdavis.edu/~ma/), ["Learning to Compose with Professional Photographs on the Web"](https://arxiv.org/abs/1702.00503), in Proc. of ACM Multimedia 2017. (Supplemetnal)(pdf/mm2017-supplemental.pdf)
+[Yi-Ling Chen](https://yiling-chen.github.io/), Jan Klopp, [Min Sun](http://aliensunmin.github.io/), [Shao-Yi Chien](http://www.ee.ntu.edu.tw/profile?id=101), [Kwan-Liu Ma](http://www.cs.ucdavis.edu/~ma/), ["Learning to Compose with Professional Photographs on the Web"](https://arxiv.org/abs/1702.00503), in Proc. of ACM Multimedia 2017. [(Supplemetnal)](pdf/mm2017-supplemental.pdf)
 
 ## Dependencies
 
