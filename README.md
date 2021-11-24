@@ -41,7 +41,7 @@ We provide the evaluation script to reproduce our evaluation results on [Flickr 
 ```bash
 $ python vfn_eval.py --spp false --snapshot snapshots/model-wo-spp
 ```
-You will need to get `sliding_window.json` and the test images from the [Flickr cropping dataset](https://github.com/yiling-chen/flickr-cropping-dataset) and specify the path of your model when running `vfn_eval.py`. You can also try our pre-trained model, which can be downloaded from [here](https://drive.google.com/drive/folders/0B0sDVRDPL5zBd3ozNlFmZEZpY1k?usp=sharing).
+You will need to get `sliding_window.json` and the test images from the [Flickr cropping dataset](https://github.com/yiling-chen/flickr-cropping-dataset) and specify the path of your model when running `vfn_eval.py`. You can also try our pre-trained model, which can be downloaded from [here](https://drive.google.com/drive/folders/0B0sDVRDPL5zBd3ozNlFmZEZpY1k?resourcekey=0-8LArgbYDQT07L-Dob6Yo9w&usp=sharing).
 
 If you want to get an aesthetic score of a patch, please take a look at the example featured by [ModelDepot](https://modeldepot.io/yilingchen/view-finding-network)
 
